@@ -53,6 +53,11 @@ public class FeasibilityLogic {
                 return "教室时间冲突";
             }
         }
+
+        int nowLength = (timePeriod == 1 || timePeriod == 2 || timePeriod == 4) ? 3 : 2;
+        if(nowLength != classInfo.getLength()){
+            return "该时间段无法容纳该课程";
+        }
         return ""; //可行返回空串
     }
 }
