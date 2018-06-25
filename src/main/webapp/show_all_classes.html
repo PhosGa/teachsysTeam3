@@ -99,33 +99,15 @@
 				</div>
 			</nav>
 			<div class="col-md-offset-2 main">
-				<form class="form-inline">
-					<select id="newplace" class="form-control">
-					  <option style="color: #b6b6b6" disabled selected>校区</option>
-					  <option value="紫金港">紫金港</option>
-					  <option value="玉泉">玉泉</option>
-					  <option value="西溪">西溪</option>
-					</select>
-					<div class="form-group"><input id="newroom" class="form-control" placeholder="教室"></div>
-					<div class="form-group"><input id="newcapacity" class="form-control" placeholder="容量"></div>
-					<select id="newequipment" class="form-control">
-					  <option style="color: #b6b6b6" disabled selected>设备</option>
-					  <option value="none">none</option>
-					  <option value="processor">processor</option>
-					</select>
-				  <button  type="button" class="btn btn-outline-info" onclick="add();">新增</button>
-				</form>
-				
+
+				<div align="center" class="mb-4">
+					<h1>所有课程</h1>
+				</div>
 				
 				<div id="classroom">
-					<div id="list" class="container-fluid mb-5">
-							<div id="toolbar" class="btn-group">
-								<button id="btn_delete" type="button" class="btn btn-default" onclick="remove();">
-									<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>删除
-								</button>
-							</div>
+
 						<table id="listtable"></table>
-					</div>
+
 				</div>
 
 			</div>
@@ -151,11 +133,12 @@
 	<script>
 		feather.replace()
 	</script>
+
 	
 	<script>		
 		$(function () {
 			$('#listtable').bootstrapTable({
-				url: '/ResourseGet',
+				url: '/AllCourse',
 				method: 'get',
 				cache: false,
 				dataType: 'json',/*
@@ -182,127 +165,16 @@
 				showExport: true,
 				exportDataType: 'all',
 				exportTypes: ['csv', 'excel', 'xlsx', 'pdf'],  //导出文件类型
-				onEditableSave: function (field, row, oldValue, $el) {
-					alert('保存校区=' + row.place +'教室='+ row.roomnumber+ ' 容量=' + row.capacity+' 设备=' + row.equipment);
-					//添加格式验证！！
-					//重要！！
-					var param = {
-						place : row.place,
-						roomnumber : row.roomnumber,
-						capacity : parseInt(row.capacity),
-						equipment : row.equipment
-					};
-					console.log(param);
-					$.ajax({
-						type: "post",
-						url: "/ResourseUpdate",
-						data: param,
-						success: function (data, status) {
-							if (data == "success") {
-								$('#listtable').bootstrapTable("refresh");
-								alert("更新教室成功");
-							}
-						},
-						error: function () {
-							alert("更新教室失败");
-						},
-						complete: function () {
-
-						}
-					});
-				},
 				columns:
 					[
-						{ field: "checked", checkbox: true },
-						{ field: "place", title: "校区", align: "center", valign: "middle", sortable: "true" },
-						{ field: "roomnumber", title: "教室", align: "center", valign: "middle", sortable: "true" },
-						{
-							field: "capacity", title: "容量", align: "center", valign: "middle", sortable: "true", editable: {
-								type: 'text',
-								title: '容量',
-								validate: function (value) {
-									value = $.trim(value);
-									if (!value) {
-										return 'This field is required';
-									}
-									var data = $('#listtable').bootstrapTable('getData'),
-										index = $(this).parents('tr').data('index');
-									console.log(data[index]);
-									return '';
-								}
-							}
-						},
-						{ field: "equipment", title: "设备", align: "center", valign: "middle", editable: {
-								type: 'text',
-								title: '设备',
-								validate: function (value) {
-									value = $.trim(value);
-									if (!value) {
-										return 'This field is required';
-									}
-									var data = $('#listtable').bootstrapTable('getData'),
-										index = $(this).parents('tr').data('index');
-									console.log(data[index]);
-									return '';
-								}
-							},
-						}
+						//{ field: "checked", checkbox: true },
+						{ field: "id", title: "课程代号", align: "center", valign: "middle", sortable: "true" },
+						{ field: "name", title: "课程名称", align: "center", valign: "middle", sortable: "true" },
+						{ field: "equipment", title: "设备需求", align: "center", valign: "middle", sortable: "true" },
+						{ field: "classinfo", title: "课程介绍", align: "center", valign: "middle", sortable: "true" }
 					],
 			});
-		});
-		
-	function add(){
-		var param = {
-			place : $("#newplace option:selected").val(),
-			roomnumber : $("#newroom").val().toString(),
-			capacity : parseInt($("#newcapacity").val()),
-			equipment : $("#newequipment").val().toString()
-    	};
-		console.log(param);
-		$.ajax({
-            url: "/ResourseAdd",
-            type: "POST",
-            data: param,
-            success: function(data,status){
-            	console.log(data);
-				if( data == "success"){
-					$('#listtable').bootstrapTable("refresh");
-					alert("增加教学资源成功");
-				}else if( data == "fail"){
-					alert("增加教学资源失败");
-				}
-            },
-			error: function () {
-				alert("增加教学资源失败");
-			},
-    	});
-	}
-	
-	function remove() {
-		var arrselectedData = $("#listtable").bootstrapTable('getSelections');
-		if (arrselectedData.length <= 0 || arrselectedData.length >= 2 ){
-			alert("请选中一行");
-		} else {
-			//var b = JSON.stringify(arrselectedData);
-			var param = {
-				place : arrselectedData[0].place,
-				roomnumber : arrselectedData[0].roomnumber,
-			};
-			console.log(param);
-			$.ajax({
-				url : "/ResourseDelete",
-				type : "post",
-				data : param,	
-				success : function(data,status) {
-					alert("删除教室成功");
-					$("#listtable").bootstrapTable('refresh');
-				},
-				error: function(status) {
-					alert("删除教室失败");
-				}
-			});
-		}
-    }		
+		});	
 	</script>
 </body>
 
